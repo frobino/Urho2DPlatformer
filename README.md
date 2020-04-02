@@ -1,10 +1,10 @@
 # How to build the engine
 
-> sudo apt-get install libx11-dev libxrandr-dev libasound2-dev git cmake make libgl1-mesa-dev
-> git clone https://github.com/urho3d/Urho3D
-> cd Urho3D
-> mkdir build & cd build & cmake ../ & make
-> export URHO3D_HOME=/home/${USER}/Projects/Urho3D/build
+    sudo apt-get install libx11-dev libxrandr-dev libasound2-dev git cmake make libgl1-mesa-dev
+    git clone https://github.com/urho3d/Urho3D
+    cd Urho3D
+    mkdir build & cd build & cmake ../ & make
+    export URHO3D_HOME=/home/${USER}/Projects/Urho3D/build
 
 # How to create project:
 
