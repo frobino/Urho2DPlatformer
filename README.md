@@ -80,7 +80,7 @@ bin/Data:
 
 - bin/Data/Scenes/
   - contains the main scene xml to be created/edited/opened with **Editor**
-  - NOTE: this xml file is cuurently **generated** by the cpp program. See Urho2DPlatformer::HandleSceneRendered.
+  - NOTE: this xml file is currently **generated** by the cpp program. See Urho2DPlatformer::HandleSceneRendered.
 
 - bin/Data/Urho2D/ contains pngs for the characters, etc. NOTE: sprites and animation are generated using [Spriter](http://www.brashmonkey.com/spriter.htm).
 
@@ -94,6 +94,20 @@ bin/Data:
 - bin/Data/Urho2D/Tilesets/
   - contains blocks used to create the tile (png files)
   - contains a tmx file describing how to interpret the png and **how to place the blocks to create the level**.
+
+# How to use the tools around Urho3D engine
+
+## Editor
+
+The editor is found in *URHO3D_HOME/build/bin/Editor.sh*. This is a script that executes the following tool:
+
+```
+Urho3DPlayer Scripts/Editor.as
+```
+
+where *Editor.as* in an AngelScript script.
+
+When executing Editor.sh, the editor opens and we can select the scene (e.g. *bin/Data/Urho2D/Platformer2D.xml*).
 
 # References
 
