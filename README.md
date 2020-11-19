@@ -79,8 +79,10 @@ bin/Data:
   - contains pics used for background, logos, etc.
 
 - bin/Data/Scenes/
+  - **NOTE**: this folder and the contained xml file is currently **generated** by the cpp program. See *Urho2DPlatformer::HandleSceneRendered* and *Urho2DPlatformer::CreateScene*.
+  Info on how to create the inital scene are taken from *bin/Data/Urho2D/Tilesets/* tmx file,
+  see below.
   - contains the main scene xml to be created/edited/opened with **Editor**
-  - NOTE: this xml file is currently **generated** by the cpp program. See Urho2DPlatformer::HandleSceneRendered.
 
 - bin/Data/Urho2D/ contains pngs for the characters, etc. NOTE: sprites and animation are generated using [Spriter](http://www.brashmonkey.com/spriter.htm).
 
