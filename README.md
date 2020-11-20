@@ -111,6 +111,78 @@ where *Editor.as* in an AngelScript script.
 
 When executing Editor.sh, the editor opens and we can select the scene (e.g. *bin/Data/Urho2D/Platformer2D.xml*).
 
+# 2D Physics
+
+## Body collision example:
+
+Urho2D implements rigid body physics simulation using the [Box2D](http://box2d.org/manual.pdf) library.
+
+Urho2DPlatformer.cpp:
+```
+void Urho2DPlatformer::SubscribeToEvents()
+{
+    ...
+    // Subscribe to Box2D contact listeners
+    SubscribeToEvent(E_PHYSICSBEGINCONTACT2D, URHO3D_HANDLER(Urho2DPlatformer, HandleCollisionBegin));
+    ...
+}
+```
+
+In the **engine**:
+
+Source/Urho3D/Urho2D/PhysicsWorld2D.cpp:
+```
+// Implement b2ContactListener from Box2D.
+// BeginContact is called when two fixtures begin to touch.
+//
+// See b2Contact::Update(b2ContactListener* listener), which calls BeginContact!
+// How Box2D identifies collisions (raycasting or other tech is still unclear to me)
+void PhysicsWorld2D::BeginContact(b2Contact* contact)
+{
+    ...
+    beginContactInfos_.Push(ContactInfo(contact));
+    ...
+}
+
+void PhysicsWorld2D::SendBeginContactEvents()
+{
+  for (unsigned i = 0; i < beginContactInfos_.Size(); ++i)
+  {
+      ContactInfo& contactInfo = beginContactInfos_[i];
+      eventData[P_BODYA] = contactInfo.bodyA_.Get();
+      ...
+      SendEvent(E_PHYSICSBEGINCONTACT2D, eventData);
+      ...
+  }
+}
+```
+
+## Raycast example:
+
+Source/Urho3D/Urho2D/PhysicsWorld2D.cpp:
+```
+// Return in "result" parameter
+void PhysicsWorld2D::RaycastSingle(PhysicsRaycastResult2D& result, const Vector2& startPoint, const Vector2& endPoint, unsigned collisionMask)
+{
+    ...
+    SingleRayCastCallback callback(result, startPoint, collisionMask);
+    world_->RayCast(&callback, ToB2Vec2(startPoint), ToB2Vec2(endPoint));
+}
+```
+
+Box2D/Collision/Shapes/b2collision.cpp - Similar to the one I developed:
+```
+// Collision Detection in Interactive 3D Environments by Gino van den Bergen
+// From Section 3.1.2
+// x = s + a * r
+// norm(x) = radius
+bool b2CircleShape::RayCast(b2RayCastOutput* output, const b2RayCastInput& input,
+							const b2Transform& transform, int32 childIndex) const
+{
+  ... similar to the one I developed...
+}
+```
+
 # References
 
 [Simpler instuctions than official documentation](https://github.com/urho3d/Urho3D/wiki)  
