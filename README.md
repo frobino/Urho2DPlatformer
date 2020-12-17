@@ -10,8 +10,13 @@ Alternative 1:
 
 Alternative 2 (similar to project creation):
 
+    // Build using classic cpp compiler
     cd script & ./cmake_generic.sh ../build -DCMAKE_BUILD_TYPE=Debug
-    cd ../build & bear make
+    cd ../build & bear -- make
+
+    // Build to Wasm using emcc compiler
+    cd script & ./cmake_emscripten.sh ../build/ -DEMSCRIPTEN_ROOT_PATH=/home/${USER}/Tools/emsdk/upstream/emscripten
+    cd ../build & bear -- make
 
 Before building a game linked to Urho3D do always add the following env var:
 
@@ -23,16 +28,16 @@ Before building a game linked to Urho3D do always add the following env var:
 2. cp -r /home/user/Projects/Urho3D/bin .
 3. cp -r /home/user/Projects/Urho3D/CMake .
 4. cp -r /home/user/Projects/Urho3D/script .
-5. create CMakeLists.txt
+5. create CMakeLists.txt (using the [template](https://urho3d.github.io/documentation/1.6/_using_library.html)).
 6. create src/ folder and put inside main.cpp
 7. cd script & ./cmake_generic.sh ../build
-8. cd ../build & bear make
+8. cd ../build & bear -- make
 
 To create a debuggable binary, use the following in step 7:
 
 7. cd script & ./cmake_generic.sh ../build -DCMAKE_BUILD_TYPE=Debug
 
-TODO: add info on building for different backends
+Note that the above steps can be automated using rake. See [documentation](https://urho3d.github.io/documentation/1.6/_using_library.html).
 
 # How to browse the code:
 
@@ -64,13 +69,22 @@ src/Utilities2D/Sample2D:
 - *Sample2D* is used to avoid that the main *Urho2DPlatformer* gets too big.
 
 src/Character2D:
-- TODO
+- class used to represent the main player / hero of the game (Imp)
+- derives from Urho3D::LogicComponent class
+- contains some fields as boolean parameters such as _isKilled, etc.
+- override Update() method to update the behavior of the character at each frame
 
 src/Utilities2D/Mover:
-- TODO
+- Mover logic component
+  - Handles entity (enemy, platform...) translation along a path (set of Vector2 points)
+  - Supports looping paths and animation flip
+  - Default speed is 0.8 if 'Speed' property is not set in the tmx file objects
 
 bin/CoreData/ (partly copied from engine folder):
-- TODO
+- contain resources needed from the engine. See [documentation](https://urho3d.github.io/documentation/1.4/_main_loop.html).
+- this is not something an end user needs to write,
+  but when running the an application linked to Urho3D engine
+  expects to find these files.
 
 bin/Data:
 - contains Fonts, Scenes, Sounds, Textures, characters pngs, ...
