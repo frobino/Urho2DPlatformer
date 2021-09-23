@@ -125,6 +125,46 @@ where *Editor.as* in an AngelScript script.
 
 When executing Editor.sh, the editor opens and we can select the scene (e.g. *bin/Data/Urho2D/Platformer2D.xml*).
 
+## Profiler and Tracy
+
+Urho3D contains a profiler library, which is built by default
+when the engine is built.
+
+Results from the profiler can be shown and interpreted using
+the [DebugHud](https://github.com/urho3d/Urho3D/wiki/DebugHud-and-Profiling),
+an inbuilt utility for profiling, measuring and displaying scene,
+memory or other runtime statistics.
+To see DebugHud in action use F2 and F3 on Urho3D’s samples.
+
+An alternative to the default profiler is [Tracy](https://github.com/wolfpld/tracy).
+To use Tracy, we need first to build **both** the engine and the game
+using the option URHO3D_TRACY_PROFILING:
+
+    cd script & ./cmake_generic.sh ../build -DURHO3D_TRACY_PROFILING=1
+
+NOTE: URHO3D_PROFILING will be automatically turned off when URHO3D_TRACY_PROFILING is on.
+
+Then we can build and start the Tracy server (a.k.a. profiler):
+
+```
+sudo apt-get install libglfw3-dev
+sudo apt-get install libfreetype-dev
+sudo apt-get install libcapstone-dev
+sudo apt install build-essential g++ cmake git-all \
+    liblzma-dev zlib1g-dev libbz2-dev liblzma-dev \
+    libboost-date-time-dev libboost-program-options-dev \
+    libboost-system-dev libboost-filesystem-dev \
+    libboost-iostreams-dev
+sudo apt-get install libgtk-3-dev
+git clone https://github.com/wolfpld/tracy.git
+cd tracy/profiler/build/unix
+make release
+./Tracy-release
+```
+
+See [install instructions](https://www.gear-genomics.com/docs/tracy/installation/#installation-from-source)
+and [pull request description](https://discourse.urho3d.io/t/tracy-profiler-integration-for-urho3d/6627/17)
+
 # 2D Physics
 
 ## Body collision example:
