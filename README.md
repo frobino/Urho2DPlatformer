@@ -39,6 +39,51 @@ To create a debuggable binary, use the following in step 7:
 
 Note that the above steps can be automated using rake. See [documentation](https://urho3d.github.io/documentation/1.6/_using_library.html).
 
+# How to build the engine using DBE
+
+DBE is a dockerized environment with all tools needed to build Urho3D
+and apps for all platforms based on Urho3D.
+
+    git clone https://github.com/urho3d/Urho3D.git
+    cd Urho3D
+    # Install Urho3D library to a default install location
+    script/dockerized.sh linux rake build install
+
+or
+
+    URHO3D_HOME=/home/urho3d/.urho3d/install/linux URHO3D_TRACY_PROFILING=1 script/dockerized.sh linux
+
+# How to create (or build) project using DBE
+
+Export the path to the Urho3d home (that was installed inside the DBE):
+
+    export URHO3D_HOME=/home/urho3d/.urho3d/install/linux
+
+Create the app under the Urho3D/demo folder (or clone the app in the
+Urho3D/demo folder, in this case Urho2DPlatformer) and build:
+
+    # Create a new UrhoApp
+    script/dockerized.sh linux rake new[Urho2DPlatformer,demo]
+    cd demo/Urho2DPlatformer
+    # Build the newly generated UrhoApp
+    script/dockerized.sh linux
+
+or build with some special options:
+
+    # Build the newly generated UrhoApp
+    URHO3D_HOME=/home/urho3d/.urho3d/install/linux URHO3D_TRACY_PROFILING=1 script/dockerized.sh linux
+
+NOTE: the command above (necessary to build an application with tracy) is currently not working.
+To get around the issue, I was able to use the following "trick":
+
+    cd /home/user/Projects/Urho3D
+    export URHO3D_HOME="/home/$USER/Projects/Urho3D/build/dockerized-linux/"
+    # Enter in the dockerized env from the engine folder
+    script/dockerized.sh linux bash
+    cd demo/Urho2DPlatformer/script
+    ./cmake_generic.sh ../build -DURHO3D_TRACY_PROFILING=1
+    cd ../build && make
+
 # How to browse the code:
 
 The "main" can be found where the URHO3D_DEFINE_APPLICATION_MAIN(..applicationName..) macro is.
