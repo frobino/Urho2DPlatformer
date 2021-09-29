@@ -55,6 +55,8 @@
 
 #include <Urho3D/DebugNew.h>
 
+#include <Urho3D/Core/Profiler.h>
+
 #include "Character2D.h"
 #include "Utilities2D/Sample2D.h"
 #include "Utilities2D/Mover.h"
@@ -195,6 +197,7 @@ void Urho2DPlatformer::SubscribeToEvents()
 
 void Urho2DPlatformer::HandleCollisionBegin(StringHash eventType, VariantMap& eventData)
 {
+    URHO3D_PROFILE(myFunction);
     // Get colliding node
     auto* hitNode = static_cast<Node*>(eventData[PhysicsBeginContact2D::P_NODEA].GetPtr());
     if (hitNode->GetName() == "Imp")
