@@ -25,10 +25,10 @@
 #include <Urho3D/UI/BorderImage.h>
 #include <Urho3D/UI/Button.h>
 #include <Urho3D/Graphics/Camera.h>
-#include <Urho3D/Urho2D/CollisionBox2D.h>
-#include <Urho3D/Urho2D/CollisionChain2D.h>
-#include <Urho3D/Urho2D/CollisionCircle2D.h>
-#include <Urho3D/Urho2D/CollisionPolygon2D.h>
+#include <Urho3D/Physics2D/CollisionBox2D.h>
+#include <Urho3D/Physics2D/CollisionChain2D.h>
+#include <Urho3D/Physics2D/CollisionCircle2D.h>
+#include <Urho3D/Physics2D/CollisionPolygon2D.h>
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Engine/Engine.h>
@@ -39,7 +39,7 @@
 #include <Urho3D/Urho2D/ParticleEffect2D.h>
 #include <Urho3D/Urho2D/ParticleEmitter2D.h>
 #include <Urho3D/Resource/ResourceCache.h>
-#include <Urho3D/Urho2D/RigidBody2D.h>
+#include <Urho3D/Physics2D/RigidBody2D.h>
 #include <Urho3D/Scene/Scene.h>
 #include <Urho3D/Audio/Sound.h>
 #include <Urho3D/Audio/SoundSource.h>

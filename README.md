@@ -1,41 +1,68 @@
-# How to build the engine
+# How to build the engine (legacy)
 
-    sudo apt-get install libx11-dev libxrandr-dev libasound2-dev git cmake make libgl1-mesa-dev
-    git clone https://github.com/urho3d/Urho3D
-    cd Urho3D
+Note: tested with U3D 8e9c11f7febfd36b382f4c391b3d3747e800a63e
+
+```
+sudo apt-get install libx11-dev libxrandr-dev libasound2-dev git cmake make libgl1-mesa-dev
+git clone https://github.com/u3d-community/U3D
+cd U3D
+```
 
 Alternative 1:
 
-    mkdir build & cd build & cmake ../ & make
+```
+mkdir build & cd build & cmake ../ & make
+```
 
-Alternative 2 (similar to project creation):
+Alternative 2 (similar to project build procedure):
 
-    // Build using classic cpp compiler
-    cd script & ./cmake_generic.sh ../build -DCMAKE_BUILD_TYPE=Debug
-    cd ../build & bear -- make
+```
+// Build using classic cpp compiler
+cd script & ./cmake_generic.sh ../build -DCMAKE_BUILD_TYPE=Debug
+cd ../build & bear -- make
+```
 
-    // Build to Wasm using emcc compiler
-    cd script & ./cmake_emscripten.sh ../build/ -DEMSCRIPTEN_ROOT_PATH=/home/${USER}/Tools/emsdk/upstream/emscripten
-    cd ../build & bear -- make
+```
+// Build to Wasm using emcc compiler
+cd script & ./cmake_emscripten.sh ../build/ -DEMSCRIPTEN_ROOT_PATH=/home/${USER}/Tools/emsdk/upstream/emscripten
+cd ../build & bear -- make
+```
 
 Before building a game linked to Urho3D do always add the following env var:
 
-    export URHO3D_HOME=/home/${USER}/Projects/Urho3D/build
+```
+export URHO3D_HOME=/home/${USER}/Projects/U3D/build
+```
 
-# How to create project:
+# How to create project (legacy)
 
-1. mkdir Urho3DSampleProject & cd Urho3DSampleProject
-2. cp -r /home/user/Projects/Urho3D/bin .
-3. cp -r /home/user/Projects/Urho3D/CMake .
-4. cp -r /home/user/Projects/Urho3D/script .
-5. create CMakeLists.txt (using the [template](https://urho3d.github.io/documentation/1.6/_using_library.html)).
-6. create src/ folder and put inside main.cpp
-7. cd script & ./cmake_generic.sh ../build
-8. cd ../build & bear -- make
+
+```
+mkdir Urho3DSampleProject & cd Urho3DSampleProject
+cp -r /home/$USER/Projects/U3D/bin .
+cp -r /home/$USER/Projects/U3D/CMake .
+cp -r /home/$USER/Projects/U3D/script .
+```
+then:
+
+- create CMakeLists.txt (using the [template](https://urho3d.github.io/documentation/1.6/_using_library.html)).
+- create src/ folder and put inside main.cpp
+
+# How to build the project (legacy)
+
+```
+cd <pathToProject>
+cd script & ./cmake_generic.sh ../build
+cd ../build & bear -- make
+```
 
 To create a debuggable binary, use the following in step 7:
 
-7. cd script & ./cmake_generic.sh ../build -DCMAKE_BUILD_TYPE=Debug
+```
+cd <pathToProject>
+cd script & ./cmake_generic.sh ../build -DCMAKE_BUILD_TYPE=Debug
+cd ../build & bear -- make
+```
 
 Note that the above steps can be automated using rake. See [documentation](https://urho3d.github.io/documentation/1.6/_using_library.html).
 
@@ -44,45 +71,64 @@ Note that the above steps can be automated using rake. See [documentation](https
 DBE is a dockerized environment with all tools needed to build Urho3D
 and apps for all platforms based on Urho3D.
 
-    git clone https://github.com/urho3d/Urho3D.git
-    cd Urho3D
-    # Install Urho3D library to a default install location
-    script/dockerized.sh linux rake build install
+```
+git clone https://github.com/u3d-community/U3D
+cd U3D
+# Install U3D library to a default install location inside the container
+script/dockerized.sh linux rake build install
+```
 
 or
 
-    URHO3D_HOME=/home/urho3d/.urho3d/install/linux URHO3D_TRACY_PROFILING=1 script/dockerized.sh linux
+URHO3D_HOME=/home/urho3d/.urho3d/install/linux URHO3D_TRACY_PROFILING=1 script/dockerized.sh linux
 
-# How to create (or build) project using DBE
+# How to create (and build) project using DBE
 
 Export the path to the Urho3d home (that was installed inside the DBE):
 
-    export URHO3D_HOME=/home/urho3d/.urho3d/install/linux
+```
+export URHO3D_HOME=/home/urho3d/.urho3d/install/linux
+```
 
 Create the app under the Urho3D/demo folder (or clone the app in the
 Urho3D/demo folder, in this case Urho2DPlatformer) and build:
 
-    # Create a new UrhoApp
-    script/dockerized.sh linux rake new[Urho2DPlatformer,demo]
-    cd demo/Urho2DPlatformer
-    # Build the newly generated UrhoApp
-    script/dockerized.sh linux
+```
+cd U3D
+# Create a new application called Urho2DPlatformer under the U3D/demo folder
+./script/dockerized.sh linux rake new[Urho2DPlatformer,demo]
+cd demo/Urho2DPlatformer
+# Build the newly generated UrhoApp
+./script/dockerized.sh linux
+```
+
+If the application is outside of the U3D project, to build it just add the URHO3D_HOME:
+
+```
+cd <pathToYourProject>
+# Build the application. NOTE: no need to create "build" folder manually.
+URHO3D_HOME=/home/urho3d/.urho3d/install/linux script/dockerized.sh linux
+```
 
 or build with some special options:
 
-    # Build the newly generated UrhoApp
-    URHO3D_HOME=/home/urho3d/.urho3d/install/linux URHO3D_TRACY_PROFILING=1 script/dockerized.sh linux
+```
+# Build the newly generated UrhoApp
+URHO3D_HOME=/home/urho3d/.urho3d/install/linux URHO3D_TRACY_PROFILING=1 script/dockerized.sh linux
+```
 
 NOTE: the command above (necessary to build an application with tracy) is currently not working.
 To get around the issue, I was able to use the following "trick":
 
-    cd /home/user/Projects/Urho3D
-    export URHO3D_HOME="/home/$USER/Projects/Urho3D/build/dockerized-linux/"
-    # Enter in the dockerized env from the engine folder
-    script/dockerized.sh linux bash
-    cd demo/Urho2DPlatformer/script
-    ./cmake_generic.sh ../build -DURHO3D_TRACY_PROFILING=1
-    cd ../build && make
+```
+cd /home/user/Projects/Urho3D
+export URHO3D_HOME="/home/$USER/Projects/Urho3D/build/dockerized-linux/"
+# Enter in the dockerized env from the engine folder
+script/dockerized.sh linux bash
+cd demo/Urho2DPlatformer/script
+./cmake_generic.sh ../build -DURHO3D_TRACY_PROFILING=1
+cd ../build && make
+```
 
 # How to browse the code:
 
