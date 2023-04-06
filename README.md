@@ -26,6 +26,7 @@ cd ../build & bear -- make
 // Build to Wasm using emcc compiler
 cd script & ./cmake_emscripten.sh ../build/ -DEMSCRIPTEN_ROOT_PATH=/home/${USER}/Tools/emsdk/upstream/emscripten
 cd ../build & bear -- make
+// To see the result in the browser you need to run http-server or similar, do not open directly the html file!
 ```
 
 Before building a game linked to Urho3D do always add the following env var:
@@ -64,6 +65,8 @@ cd script & ./cmake_generic.sh ../build -DCMAKE_BUILD_TYPE=Debug
 cd ../build & bear -- make
 ```
 
+script/cmake_generic.sh "build/dockerized-web" -D WEB=1 -D URHO3D_HOME=/home/urho3d/.urho3d/install/web -D CMAKE_INSTALL_PREFIX=/home/urho3d/.urho3d/install/webemcc (Emscripten gcc/clang-like replacement) 2.0.8 (d059fd603d0b45b584f634dc2365bc9e9a6ec1dd)
+
 Note that the above steps can be automated using rake. See [documentation](https://urho3d.github.io/documentation/1.6/_using_library.html).
 
 # How to build the engine using DBE
@@ -80,7 +83,15 @@ script/dockerized.sh linux rake build install
 
 or
 
+```
 URHO3D_HOME=/home/urho3d/.urho3d/install/linux URHO3D_TRACY_PROFILING=1 script/dockerized.sh linux
+```
+
+or
+
+```
+script/dockerized.sh web rake build install
+```
 
 # How to create (and build) project using DBE
 
@@ -128,6 +139,16 @@ script/dockerized.sh linux bash
 cd demo/Urho2DPlatformer/script
 ./cmake_generic.sh ../build -DURHO3D_TRACY_PROFILING=1
 cd ../build && make
+```
+
+Similarly for the web build:
+```
+cd /home/user/Projects/Urho2DPlatformer
+# enter in the dockerized env (note, we need to build U3D in dockerized env first)
+URHO3D_HOME=/home/urho3d/.urho3d/install/web script/dockerized.sh web bash
+script/cmake_generic.sh "build/dockerized-web" -D WEB=1 -D URHO3D_HOME=/home/urho3d/.urho3d/install/web
+cd build/dockerized-web
+make
 ```
 
 # How to browse the code:
