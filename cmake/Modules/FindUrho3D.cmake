@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008-2020 the Urho3D project.
+# Copyright (c) 2008-2022 the Urho3D project.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -73,9 +73,23 @@ if (CMAKE_PROJECT_NAME STREQUAL Urho3D AND TARGET Urho3D)
     set (FOUND_MESSAGE "Found Urho3D: as CMake target")
     set (URHO3D_COMPILE_RESULT TRUE)
 else ()
-    if (ANDROID AND GRADLE_BUILD_DIR)
-        # Urho3D AAR is a universal library
-        set (URHO3D_HOME ${GRADLE_BUILD_DIR}/tree/${CMAKE_BUILD_TYPE}/${ANDROID_ABI})
+    if (ANDROID)
+        string (TOLOWER ${CMAKE_BUILD_TYPE} config)
+        if (BUILD_STAGING_DIR)
+            # Another special case where library location is already known to be in the build tree of Urho3D project
+            set (URHO3D_HOME ${BUILD_STAGING_DIR}/cmake/${config}/${ANDROID_ABI})
+        elseif (JNI_DIR)
+            # Using Urho3D AAR from Maven repository
+            set (URHO3D_HOME ${JNI_DIR}/urho3d/${config}/${ANDROID_ABI})
+        else ()
+            message (FATAL_ERROR "Neither 'BUILD_STAGING_DIR' nor 'JNI_DIR' is set")
+        endif ()
+        if (URHO3D_LIB_TYPE STREQUAL STATIC)
+            set (URHO3D_LIBRARIES ${URHO3D_HOME}/lib/libUrho3D.a)
+        else ()
+            set (URHO3D_LIBRARIES ${URHO3D_HOME}/lib/libUrho3D.so)
+        endif ()
+        set (SKIP_COMPILE_TEST TRUE)
     elseif (NOT URHO3D_HOME AND DEFINED ENV{URHO3D_HOME})
         # Library location would be searched (based on URHO3D_HOME variable if provided and in system-wide default location)
         file (TO_CMAKE_PATH "$ENV{URHO3D_HOME}" URHO3D_HOME)
@@ -163,7 +177,9 @@ else ()
     foreach (ABI_64BIT RANGE ${URHO3D_64BIT} 0)
         # Set to search in 'lib' or 'lib64' based on the ABI being tested
         set_property (GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS ${ABI_64BIT})    # Leave this global property setting afterwards, do not restore it to its previous value
-        find_library (URHO3D_LIBRARIES NAMES Urho3D PATH_SUFFIXES ${PATH_SUFFIX} ${SEARCH_OPT} DOC "Urho3D library directory")
+        if (NOT URHO3D_LIBRARIES)
+            find_library (URHO3D_LIBRARIES NAMES Urho3D PATH_SUFFIXES ${PATH_SUFFIX} ${SEARCH_OPT} DOC "Urho3D library directory")
+        endif ()
         if (WIN32)
             # For Windows platform, give a second chance to search for a debug version of the library
             find_library (URHO3D_LIBRARIES_DBG NAMES Urho3D_d PATH_SUFFIXES ${PATH_SUFFIX} ${SEARCH_OPT})
@@ -223,12 +239,11 @@ else ()
                     set (CMAKE_TRY_COMPILE_CONFIGURATION Debug)
                 endif ()
             elseif (APPLE AND ARM)
-                # Debug build does not produce universal binary library, so we could not test compile against the library
-                execute_process (COMMAND lipo -info ${URHO3D_LIBRARIES} COMMAND grep -cq arm RESULT_VARIABLE SKIP_COMPILE_TEST OUTPUT_QUIET ERROR_QUIET)
+                # Apple does not support 32-bit ARM anymore so skip the test and always assume to be arm64
+                set (SKIP_COMPILE_TEST 1)
             endif ()
             set (COMPILER_FLAGS "${COMPILER_32BIT_FLAG} ${CMAKE_REQUIRED_FLAGS}")
-            if (SKIP_COMPILE_TEST
-                OR CMAKE_PROJECT_NAME STREQUAL Urho3D-Launcher)     # Workaround initial IDE "gradle sync" error due to library has not been built yet
+            if (SKIP_COMPILE_TEST)
                 set (URHO3D_COMPILE_RESULT 1)
             else ()
                 while (NOT URHO3D_COMPILE_RESULT)
@@ -251,13 +266,8 @@ else ()
             if (URHO3D_COMPILE_RESULT)
                 # Auto-discover build options used by the found library and export header
                 file (READ ${URHO3D_BASE_INCLUDE_DIR}/Urho3D.h EXPORT_HEADER)
-                if (APPLE AND ARM)
-                    # Since Urho3D library for Apple/ARM platforms is a universal binary (except when it was a Debug build), we need another way to find out the compiler ABI the library was built for
-                    execute_process (COMMAND lipo -info ${URHO3D_LIBRARIES} COMMAND grep -c x86_64 OUTPUT_VARIABLE ABI_64BIT ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
-                elseif (MSVC)
-                    if (COMPILER_STATIC_RUNTIME_FLAGS)
-                        set (EXPORT_HEADER "${EXPORT_HEADER}#define URHO3D_STATIC_RUNTIME\n")
-                    endif ()
+                if (MSVC AND COMPILER_STATIC_RUNTIME_FLAGS)
+                    set (EXPORT_HEADER "${EXPORT_HEADER}#define URHO3D_STATIC_RUNTIME\n")
                 endif ()
                 set (URHO3D_64BIT ${ABI_64BIT} CACHE BOOL "Enable 64-bit build, the value is auto-discovered based on the found Urho3D library" FORCE) # Force it as it is more authoritative than user-specified option
                 set (URHO3D_LIB_TYPE ${URHO3D_LIB_TYPE} CACHE STRING "Urho3D library type, the value is auto-discovered based on the found Urho3D library" FORCE) # Use the Force, Luke

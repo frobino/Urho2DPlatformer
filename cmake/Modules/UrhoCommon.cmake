@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008-2021 the Urho3D project.
+# Copyright (c) 2008-2022 the Urho3D project.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -153,7 +153,8 @@ option (URHO3D_LUA "Enable additional Lua scripting support" TRUE)
 option (URHO3D_NAVIGATION "Enable navigation support" TRUE)
 cmake_dependent_option (URHO3D_NETWORK "Enable networking support" TRUE "NOT WEB" FALSE)
 option (URHO3D_PHYSICS "Enable physics support" TRUE)
-option (URHO3D_URHO2D "Enable 2D graphics and physics support" TRUE)
+option (URHO3D_PHYSICS2D "Enable 2D physics support" TRUE)
+option (URHO3D_URHO2D "Enable 2D graphics support" TRUE)
 option (URHO3D_WEBP "Enable WebP support" TRUE)
 if (ARM AND NOT ANDROID AND NOT RPI AND NOT APPLE)
     set (ARM_ABI_FLAGS "" CACHE STRING "Specify ABI compiler flags (ARM on Linux platform only); e.g. Orange-Pi Mini 2 could use '-mcpu=cortex-a7 -mfpu=neon-vfpv4'")
@@ -420,6 +421,7 @@ if (URHO3D_CLANG_TOOLS)
             URHO3D_NAVIGATION
             URHO3D_NETWORK
             URHO3D_PHYSICS
+            URHO3D_PHYSICS2D
             URHO3D_PROFILING
             URHO3D_URHO2D)
         set (${OPT} 1)
@@ -429,11 +431,11 @@ if (URHO3D_CLANG_TOOLS)
     endforeach ()
 endif ()
 
-if (URHO3D_GENERATEBINDINGS)
+#if (URHO3D_GENERATEBINDINGS)
     # Ensure the script subsystems are enabled at the very least
-    set (URHO3D_ANGELSCRIPT 1)
-    set (URHO3D_LUA 1)
-endif ()
+#    set (URHO3D_ANGELSCRIPT 1)
+#    set (URHO3D_LUA 1)
+#endif ()
 
 # Coverity scan does not support PCH
 if ($ENV{COVERITY_SCAN_BRANCH})
@@ -476,6 +478,7 @@ foreach (OPT
         URHO3D_NAVIGATION
         URHO3D_NETWORK
         URHO3D_PHYSICS
+        URHO3D_PHYSICS2D
         URHO3D_PROFILING
         URHO3D_TRACY_PROFILING
         URHO3D_THREADING
@@ -517,28 +520,28 @@ if (APPLE)
         # iOS-specific setup
         add_definitions (-DIOS)
         if (URHO3D_64BIT)
-            set (CMAKE_OSX_ARCHITECTURES $(ARCHS_STANDARD))
+            set (CMAKE_OSX_ARCHITECTURES $(ARCHS_STANDARD) CACHE STRING "OSX Architectures to build for. Default $(ARCHS_STANDARD)")
         else ()
             message (WARNING "URHO3D_64BIT=0 for iOS is a deprecated option and should not be used as we are phasing out 32-bit only mode")
-            set (CMAKE_OSX_ARCHITECTURES $(ARCHS_STANDARD_32_BIT))
+            set (CMAKE_OSX_ARCHITECTURES $(ARCHS_STANDARD_32_BIT) CACHE STRING "OSX Architectures to build for. Default $(ARCHS_STANDARD_32_BIT)")
         endif ()
     elseif (TVOS)
         # tvOS-specific setup
         add_definitions (-DTVOS)
-        set (CMAKE_OSX_ARCHITECTURES $(ARCHS_STANDARD))
+        set (CMAKE_OSX_ARCHITECTURES $(ARCHS_STANDARD) CACHE STRING "OSX Architectures to build for. Default $(ARCHS_STANDARD)")
     else ()
         if (XCODE)
             # macOS-specific setup
             if (URHO3D_64BIT)
                 if (URHO3D_UNIVERSAL)
                     message (WARNING "URHO3D_UNIVERSAL=1 for macOS is a deprecated option and should not be used as we are phasing out macOS universal binary mode")
-                    set (CMAKE_OSX_ARCHITECTURES $(ARCHS_STANDARD_32_64_BIT))
+                    set (CMAKE_OSX_ARCHITECTURES $(ARCHS_STANDARD_32_64_BIT) CACHE STRING "OSX Architectures to build for. Default $(ARCHS_STANDARD_32_64_BIT)")
                 else ()
-                    set (CMAKE_OSX_ARCHITECTURES $(ARCHS_STANDARD))
+                    set (CMAKE_OSX_ARCHITECTURES $(ARCHS_STANDARD) CACHE STRING "OSX Architectures to build for. Default $(ARCHS_STANDARD)")
                 endif ()
             else ()
                 message (WARNING "URHO3D_64BIT=0 for macOS is a deprecated option and should not be used as we are phasing out 32-bit only mode")
-                set (CMAKE_OSX_ARCHITECTURES $(ARCHS_STANDARD_32_BIT))
+                set (CMAKE_OSX_ARCHITECTURES $(ARCHS_STANDARD_32_BIT) CACHE STRING "OSX Architectures to build for. Default $(ARCHS_STANDARD_32_BIT)")
             endif ()
         endif ()
     endif ()
@@ -1911,11 +1914,13 @@ if (IOS)
         # (see http://public.kitware.com/Bug/bug_relationship_graph.php?bug_id=12506&graph=dependency),
         # below temporary fix is required to work around the bug
         list (APPEND POST_CMAKE_FIXES COMMAND sed -i '' 's/\$$\(EFFECTIVE_PLATFORM_NAME\)//g' ${CMAKE_BINARY_DIR}/CMakeScripts/install_postBuildPhase.make* || exit 0)
+        message (WARNING "Added a possibly broken 'fix' to an Xcode generator bug as ${CMAKE_VERSION} VERSION_LESS 3.4. See https://discourse.urho3d.io/t/ios-xcode-sed-cant-read-s-effective-platform-name-g-n/1629 for more info.")
     endif ()
 elseif (TVOS)
     # Almost the same bug as iOS one above but not quite, most probably because CMake does not support AppleTV platform yet
     list (APPEND POST_CMAKE_FIXES COMMAND sed -i '' 's/\)\$$\(EFFECTIVE_PLATFORM_NAME\)/\) -DEFFECTIVE_PLATFORM_NAME=$$\(EFFECTIVE_PLATFORM_NAME\)/g' ${CMAKE_BINARY_DIR}/CMakeScripts/install_postBuildPhase.make* || exit 0)
     add_custom_target (APPLETV_POST_CMAKE_FIX COMMAND sed -i '' -E 's,\(Debug|RelWithDebInfo|Release\)/,$$\(CONFIGURATION\)$$\(EFFECTIVE_PLATFORM_NAME\)/,g' ${CMAKE_BINARY_DIR}/Source/Urho3D/CMakeScripts/Urho3D_cmakeRulesBuildPhase.make* || exit 0)
+	message (WARNING "Added a possibly broken 'fix' to an Xcode generator bug as ${CMAKE_VERSION} VERSION_LESS 3.4. See https://discourse.urho3d.io/t/ios-xcode-sed-cant-read-s-effective-platform-name-g-n/1629 for more info.")
 endif ()
 if (POST_CMAKE_FIXES)
     add_custom_target (POST_CMAKE_FIXES ALL ${POST_CMAKE_FIXES} COMMENT "Applying post-cmake fixes")

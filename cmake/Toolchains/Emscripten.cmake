@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008-2020 the Urho3D project.
+# Copyright (c) 2008-2022 the Urho3D project.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -60,8 +60,16 @@ if (NOT IN_TRY_COMPILE)
             if (DEFINED ENV{EMSCRIPTEN_ROOT_PATH})
                 file (TO_CMAKE_PATH $ENV{EMSCRIPTEN_ROOT_PATH} EMSCRIPTEN_ROOT_PATH)
             elseif (DEFINED ENV{EM_CONFIG})
+                # Attempt to auto detect the Emscripten root path from the config file
                 file (STRINGS $ENV{EM_CONFIG} EMSCRIPTEN_ROOT_PATH REGEX "^EMSCRIPTEN_ROOT = '.*'$")
-                string (REGEX REPLACE "^EMSCRIPTEN_ROOT = '(.*)'$" \\1 EMSCRIPTEN_ROOT_PATH "${EMSCRIPTEN_ROOT_PATH}")    # Stringify to guard against empty variable
+                if (EMSCRIPTEN_ROOT_PATH)
+                    string (REGEX REPLACE "^EMSCRIPTEN_ROOT = '(.*)'$" \\1 EMSCRIPTEN_ROOT_PATH ${EMSCRIPTEN_ROOT_PATH})
+                else ()
+                    # Newer config file requires Python to actually evaluate it, basically, `cat $EM_CONFIG <(echo 'print(EMSCRIPTEN_ROOT)') |python -`
+                    file (STRINGS $ENV{EM_CONFIG} EM_CONFIG NEWLINE_CONSUME)
+                    execute_process (COMMAND ${CMAKE_COMMAND} -E echo "${EM_CONFIG}\nprint(EMSCRIPTEN_ROOT)"
+                                     COMMAND python - OUTPUT_VARIABLE EMSCRIPTEN_ROOT_PATH OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+                endif ()
             endif ()
         endif ()
         set (EMSCRIPTEN_ROOT_PATH ${EMSCRIPTEN_ROOT_PATH} CACHE STRING "Root path to Emscripten cross-compiler tools (Emscripten only)")
@@ -99,6 +107,7 @@ endif ()
 if (NOT EMSCRIPTEN_EMCC_VERSION)
     execute_process (COMMAND ${EMSCRIPTEN_ROOT_PATH}/emcc${TOOL_EXT} --version RESULT_VARIABLE EXIT_CODE OUTPUT_VARIABLE EMSCRIPTEN_EMCC_VERSION ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
     if (EXIT_CODE EQUAL 0)
+        message (${EMSCRIPTEN_EMCC_VERSION})
         string (REGEX MATCH "[^ .]+\\.[^.]+\\.[^ ]+" EMSCRIPTEN_EMCC_VERSION "${EMSCRIPTEN_EMCC_VERSION}")
     else ()
         message (FATAL_ERROR "Could not determine the emcc version. Make sure you have installed and activated the Emscripten SDK correctly.")
@@ -151,7 +160,11 @@ foreach (LANG C CXX)
     # Since currently CMake does not able to identify Emscripten compiler toolchain, set the compiler identification explicitly
     set (CMAKE_${LANG}_COMPILER_ID_RUN TRUE)
     set (CMAKE_${LANG}_COMPILER_ID Clang)
+    set (CMAKE_${LANG}_COMPILER_FRONTEND_VARIANT GNU)
     set (CMAKE_${LANG}_COMPILER_VERSION ${EMSCRIPTEN_EMCC_VERSION})
+    # set (CMAKE_${LANG}_COMPILER_VERSION 11)
+    set (CMAKE_${LANG}_STANDARD_COMPUTED_DEFAULT ${EMSCRIPTEN_EMCC_VERSION})
+    set (CMAKE_${LANG}_EXTENSIONS_COMPUTED_DEFAULT ${EMSCRIPTEN_EMCC_VERSION})
     # The ABI info could not be checked as per normal as CMake does not understand the test build output from Emscripten, so bypass it also
     set (CMAKE_${LANG}_ABI_COMPILED TRUE)
     set (CMAKE_${LANG}_SIZEOF_DATA_PTR 4)   # Assume it is always 32-bit for now (we could have used our CheckCompilerToolChains.cmake module here)

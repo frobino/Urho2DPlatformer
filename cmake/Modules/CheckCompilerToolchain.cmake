@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008-2020 the Urho3D project.
+# Copyright (c) 2008-2022 the Urho3D project.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@
 #  X86
 #  E2K
 #
-# CPU SIMD instruction extensions support for x86/x86_64 archs:
+# CPU SIMD instruction extensions support for x86/x86_64/e2k archs:
 #  HAVE_MMX
 #  HAVE_3DNOW
 #  HAVE_SSE
@@ -42,6 +42,8 @@
 #  HAVE_SSE4
 #  HAVE_AVX
 #  HAVE_AVX2
+#
+# CPU SIMD instruction extension support for powerpc/powerpc64 archs:
 #  HAVE_ALTIVEC
 #
 # CPU SIMD instruction extension support for arm/arm64 archs:
@@ -223,7 +225,7 @@ else ()
         endif ()
     elseif (POWERPC)
         check_extension (altivec)
-    elseif (X86)
+    elseif (X86 OR E2K)
         foreach (ext sse sse2 sse3 sse4 avx avx2)
             check_extension (${ext})
         endforeach ()

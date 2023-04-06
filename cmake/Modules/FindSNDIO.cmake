@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008-2020 the Urho3D project.
+# Copyright (c) 2008-2022 the Urho3D project.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,17 +20,17 @@
 # THE SOFTWARE.
 #
 
-# Find Generic Buffer Management development library
+# Find RoarAudio development library
 #
-#  GBM_FOUND
-#  GBM_INCLUDE_DIRS
-#  GBM_LIBRARIES
+#  SNDIO_FOUND
+#  SNDIO_INCLUDE_DIRS
+#  SNDIO_LIBRARIES
 #
 
-find_path (GBM_INCLUDE_DIRS NAMES gbm.h DOC "GenericBufferManagement include directory")
-find_library (GBM_LIBRARIES NAMES gbm DOC "GenericBufferManagement library")
+find_path (SNDIO_INCLUDE_DIRS NAMES RoarAudio.h DOC "RoarAudio include directory")
+find_library (SNDIO_LIBRARIES NAMES RoarAudio DOC "RoarAudio library")
 
 include (FindPackageHandleStandardArgs)
-find_package_handle_standard_args (GenericBufferManagement REQUIRED_VARS GBM_LIBRARIES GBM_INCLUDE_DIRS FAIL_MESSAGE "Could NOT find Direct Generic Buffer Management development library")
+find_package_handle_standard_args (SNDIO REQUIRED_VARS SNDIO_LIBRARIES SNDIO_INCLUDE_DIRS FAIL_MESSAGE "Could NOT find RoarAudio development library")
 
-mark_as_advanced (GBM_INCLUDE_DIRS GBM_LIBRARIES)
+mark_as_advanced (SNDIO_INCLUDE_DIRS SNDIO_LIBRARIES)
